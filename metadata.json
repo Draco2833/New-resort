@@ -1,0 +1,6 @@
+{
+  "name": "Sentinel DRP",
+  "description": "Digital Risk Protection platform for detecting brand impersonation, look-alike scam accounts, and fraudulent mobile apps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

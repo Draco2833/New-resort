@@ -1,0 +1,17 @@
+{
+  "name": "sentinel-drp",
+  "version": "1.0.0",
+  "description": "Digital Risk Protection - Social & App Monitoring Platform",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Ready for deployment'"
+  },
+  "keywords": [
+    "digital-risk-protection",
+    "cybersecurity",
+    "brand-protection",
+    "lookalike-detection"
+  ],
+  "author": "Sentinel DRP",
+  "license": "MIT"
+}
