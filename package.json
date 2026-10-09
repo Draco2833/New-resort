@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Digital Risk Protection - Social & App Monitoring Platform",
   "scripts": {
-    "start": "npx serve .",
-    "build": "echo 'Ready for deployment'"
+    "start": "npx serve public",
+    "build": "mkdir -p public && cp -f index.html public/index.html"
   },
   "keywords": [
     "digital-risk-protection",

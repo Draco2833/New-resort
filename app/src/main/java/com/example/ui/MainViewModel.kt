@@ -15,6 +15,7 @@ enum class AppNavDestination(val label: String) {
     DASHBOARD("Threats"),
     BRAND_PROFILE("Brand"),
     LOOKALIKE_LAB("Look-alike"),
+    NOTIFICATION_SHIELD("Notifs"),
     SECURITY_GATE("Security Gate"),
     ARCHITECTURE("Architecture")
 }

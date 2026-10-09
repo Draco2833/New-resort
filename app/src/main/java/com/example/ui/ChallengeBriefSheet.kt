@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -175,7 +177,7 @@ fun ChallengeBriefSheet(
             ScopeCategory(
                 sectionNumber = "6. Evaluation Criteria",
                 sectionTitle = "100-Point Rubric Satisfaction Breakdown",
-                icon = Icons.Default.FactCheck,
+                icon = Icons.AutoMirrored.Filled.FactCheck,
                 accentColor = CyberBlue,
                 items = listOf(
                     RequirementItem(
@@ -241,7 +243,7 @@ fun ChallengeBriefSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Assignment,
+                            imageVector = Icons.AutoMirrored.Filled.Assignment,
                             contentDescription = null,
                             tint = CyberCyan,
                             modifier = Modifier.size(22.dp)

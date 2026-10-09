@@ -105,6 +105,9 @@
       <button onclick="switchTab('brand')" id="tab-brand" class="px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
         <i class="fa-solid fa-building-shield"></i> Brand Profile & Whitelist
       </button>
+      <button onclick="switchTab('notifs')" id="tab-notifs" class="px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+        <i class="fa-solid fa-bell"></i> Notification Shield
+      </button>
       <button onclick="switchTab('lookalike')" id="tab-lookalike" class="px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
         <i class="fa-solid fa-magnifying-glass-chart"></i> Look-alike Lab (Bonus)
       </button>
@@ -166,6 +169,43 @@
       <!-- Official Assets Detail -->
       <div id="brand-details" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- NOTIFICATION SHIELD TAB -->
+    <div id="content-notifs" class="hidden space-y-6">
+      <div class="bg-cyberSurface border border-slate-800 rounded-xl p-5">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-bell text-cyberCyan"></i> Mobile Notification Shield & Smishing Monitor
+            </h2>
+            <p class="text-xs text-slate-400">Deep inspection of incoming Android mobile notifications against phishing SMS, brand impersonation, and fraudulent payment prompts.</p>
+          </div>
+          <span class="px-3 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-bold">100% On-Device Analysis</span>
+        </div>
+
+        <!-- Simulation Presets -->
+        <div class="p-3.5 bg-cyberCard/70 border border-slate-800 rounded-xl mb-5">
+          <p class="text-xs text-slate-300 font-semibold mb-2">Simulate Mobile Notification Interception:</p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button onclick="injectMockNotif('smishing')" class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-700 rounded flex items-center gap-1.5">
+              <i class="fa-solid fa-comment-sms"></i> Simulate Smishing SMS
+            </button>
+            <button onclick="injectMockNotif('crypto')" class="px-3 py-1.5 bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border border-amber-700 rounded flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp"></i> Simulate Crypto WhatsApp Scam
+            </button>
+            <button onclick="injectMockNotif('official')" class="px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-700 rounded flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-check"></i> Official Banking App (Whitelisted)
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification Feed Log -->
+        <h3 class="text-sm font-bold text-slate-300 mb-3">Live Intercepted Notifications Stream:</h3>
+        <div id="notif-feed-container" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
       </div>
     </div>
 
@@ -581,7 +621,7 @@ flowchart TD
     }
 
     function switchTab(tab) {
-      ['threats', 'brand', 'lookalike', 'security', 'architecture'].forEach(t => {
+      ['threats', 'brand', 'notifs', 'lookalike', 'security', 'architecture'].forEach(t => {
         document.getElementById(`content-${t}`).classList.add('hidden');
         const tabBtn = document.getElementById(`tab-${t}`);
         tabBtn.className = 'px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2';
@@ -592,7 +632,46 @@ flowchart TD
       activeBtn.className = 'px-4 py-2 text-sm font-semibold border-b-2 border-cyberCyan text-cyberCyan flex items-center gap-2';
 
       if (tab === 'brand') renderBrandDetails();
+      if (tab === 'notifs') renderNotifs();
       if (tab === 'lookalike') testLookalike();
+    }
+
+    let NOTIF_FEED = [
+      { id: 1, pkg: "com.google.android.apps.messaging", app: "Messages (SMS)", title: "Security Alert: Apex_Financia1_Support", text: "URGENT: Your account transfer was paused. Verify your identity at bit.ly/apex-claims-portal", isThreat: true, category: "BRAND_IMPERSONATION_SMISHING", score: 95 },
+      { id: 2, pkg: "com.apex.mobilebanking", app: "Apex Mobile Banking", title: "Apex Financial Notice", text: "Your monthly e-statement is ready to view in the official mobile portal.", isOfficial: true, isThreat: false, category: "OFFICIAL_EXCLUDED", score: 0 },
+      { id: 3, pkg: "com.whatsapp", app: "WhatsApp", title: "Apex Rewards Bot", text: "Exclusive Apex community giveaway! Connect wallet to claim 500 APEX tokens immediately.", isThreat: true, category: "SPAM_SCAM_HEURISTIC", score: 90 }
+    ];
+
+    function renderNotifs() {
+      const container = document.getElementById('notif-feed-container');
+      container.innerHTML = NOTIF_FEED.map(n => {
+        const border = n.isOfficial ? 'border-emerald-500/50 bg-emerald-950/20' : n.isThreat ? 'border-rose-500/80 bg-rose-950/20' : 'border-slate-800 bg-cyberSurface';
+        const badge = n.isOfficial
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">OFFICIAL EXCLUDED (0% RISK)</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400">${n.category} &bull; ${n.score}% RISK</span>`;
+
+        return `
+          <div class="border ${border} rounded-xl p-3.5 transition">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs text-cyberCyan mono">${n.app} &bull; ${n.pkg}</span>
+              ${badge}
+            </div>
+            <h5 class="text-sm font-bold text-white">${n.title}</h5>
+            <p class="text-xs text-slate-300 mt-1">${n.text}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function injectMockNotif(type) {
+      if (type === 'smishing') {
+        NOTIF_FEED.unshift({ id: Date.now(), pkg: "com.google.android.apps.messaging", app: "Messages", title: "Alert: ApexBank Priority Resolution", text: "Unusual transfer of $1,250 flagged. Cancel now at hxxp://bit.ly/apex-claims-cancel", isThreat: true, category: "BRAND_IMPERSONATION_SMISHING", score: 95 });
+      } else if (type === 'crypto') {
+        NOTIF_FEED.unshift({ id: Date.now(), pkg: "com.whatsapp", app: "WhatsApp", title: "Apex Financial AirDrop", text: "Send 1 ETH to verified treasury to receive 2 ETH back immediately!", isThreat: true, category: "SPAM_SCAM_HEURISTIC", score: 90 });
+      } else if (type === 'official') {
+        NOTIF_FEED.unshift({ id: Date.now(), pkg: "com.apex.mobilebanking", app: "Apex Mobile Banking", title: "Apex Financial Official", text: "Direct deposit of payroll received successfully.", isOfficial: true, isThreat: false, category: "OFFICIAL_EXCLUDED", score: 0 });
+      }
+      renderNotifs();
     }
 
     function setFilter(f) {

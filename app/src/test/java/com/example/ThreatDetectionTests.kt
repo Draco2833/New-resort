@@ -184,4 +184,38 @@ class ThreatDetectionTests {
         val valid = result as SecurityValidationResult.Valid
         assertEquals("Apex Financial Customer Support Portal", valid.sanitizedText)
     }
+
+    // =========================================================================
+    // 4. MOBILE NOTIFICATION SHIELD TESTS
+    // =========================================================================
+    @Test
+    fun testNotificationShieldExcludesOfficialAppNotifications() {
+        val notif = com.example.service.NotificationShieldManager.inspectAndLog(
+            packageName = "com.apex.mobilebanking",
+            appName = "Apex Mobile Banking",
+            title = "Apex Financial Account Update",
+            bodyText = "Your official statement is ready.",
+            activeBrand = brandProfile
+        )
+
+        assertTrue("Official app notification must be marked as official", notif.isOfficialAsset)
+        assertFalse("Official app notification must NOT be a threat", notif.isThreat)
+        assertEquals("Risk score must be 0", 0, notif.riskScore)
+        assertEquals("OFFICIAL_ASSET_EXCLUDED", notif.threatCategory)
+    }
+
+    @Test
+    fun testNotificationShieldDetectsSmishingBrandImpersonation() {
+        val notif = com.example.service.NotificationShieldManager.inspectAndLog(
+            packageName = "com.google.android.apps.messaging",
+            appName = "SMS Messages",
+            title = "Alert: Apex_Financia1_Support",
+            bodyText = "URGENT: Click bit.ly/apex-claims to recover your bank account",
+            activeBrand = brandProfile
+        )
+
+        assertTrue("Smishing notification must be flagged as threat", notif.isThreat)
+        assertTrue("Risk score should be high", notif.riskScore >= 70)
+        assertFalse("Should not be marked official", notif.isOfficialAsset)
+    }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -139,7 +140,7 @@ fun PresentationSlidesSheet(
                     "Presentation & Demo (10%): In-app interactive pitch deck and comprehensive documentation.",
                     "Bonus Credit (+10 Pts): Look-alike tester lab, homoglyph mapper, and strict security input validation."
                 ),
-                icon = Icons.Default.FactCheck,
+                icon = Icons.AutoMirrored.Filled.FactCheck,
                 accentColor = SafeGreenText
             )
         )

@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.testTag("open_brief_button")
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Assignment,
+                                        imageVector = Icons.AutoMirrored.Filled.Assignment,
                                         contentDescription = "Challenge Brief & Required Points",
                                         tint = CyberCyan
                                     )
@@ -120,6 +121,7 @@ class MainActivity : ComponentActivity() {
                             val items = listOf(
                                 Triple(AppNavDestination.DASHBOARD, Icons.Default.Radar, "Threats"),
                                 Triple(AppNavDestination.BRAND_PROFILE, Icons.Default.VerifiedUser, "Brand"),
+                                Triple(AppNavDestination.NOTIFICATION_SHIELD, Icons.Default.NotificationsActive, "Notifs"),
                                 Triple(AppNavDestination.LOOKALIKE_LAB, Icons.Default.FindReplace, "Look-alike"),
                                 Triple(AppNavDestination.SECURITY_GATE, Icons.Default.LocalPolice, "Security"),
                                 Triple(AppNavDestination.ARCHITECTURE, Icons.Default.AccountTree, "Arch")
@@ -156,6 +158,7 @@ class MainActivity : ComponentActivity() {
                         when (currentNav) {
                             AppNavDestination.DASHBOARD -> DashboardScreen(viewModel = viewModel)
                             AppNavDestination.BRAND_PROFILE -> BrandProfileScreen(viewModel = viewModel)
+                            AppNavDestination.NOTIFICATION_SHIELD -> NotificationShieldScreen(viewModel = viewModel)
                             AppNavDestination.LOOKALIKE_LAB -> LookalikeTesterScreen(viewModel = viewModel)
                             AppNavDestination.SECURITY_GATE -> SecurityGateScreen(viewModel = viewModel)
                             AppNavDestination.ARCHITECTURE -> ArchitectureScreen()
