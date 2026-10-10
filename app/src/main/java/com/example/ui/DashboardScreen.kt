@@ -42,6 +42,8 @@ fun DashboardScreen(
     val officialExcludedCount by viewModel.officialExcludedCount.collectAsState()
     val blockedCount by viewModel.blockedCount.collectAsState()
 
+    var showScanDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -106,18 +108,35 @@ fun DashboardScreen(
                     }
                 }
 
-                FilledTonalButton(
-                    onClick = { viewModel.repository.reScanWithProfile(currentProfile) },
-                    modifier = Modifier.testTag("rescan_button"),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Scan",
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Re-Scan", fontSize = 12.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Button(
+                        onClick = { showScanDialog = true },
+                        modifier = Modifier.testTag("scan_custom_asset_button"),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyberCyan, contentColor = CyberNavy)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddModerator,
+                            contentDescription = "Scan Custom Asset",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Scan Asset", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    FilledTonalButton(
+                        onClick = { viewModel.repository.reScanWithProfile(currentProfile) },
+                        modifier = Modifier.testTag("rescan_button"),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Scan",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Re-Scan", fontSize = 12.sp)
+                    }
                 }
             }
         }
@@ -265,6 +284,283 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+
+    // Scan Custom Asset / Probe Impersonation Dialog
+    if (showScanDialog) {
+        var assetType by remember { mutableStateOf(AssetType.SOCIAL_PROFILE) }
+        var platformName by remember { mutableStateOf("X / Twitter") }
+        var titleOrHandle by remember { mutableStateOf("@${currentProfile.name.replace(" ", "")}_FakeSupport") }
+        var displayName by remember { mutableStateOf("${currentProfile.name} Official Support") }
+        var publisherOrBio by remember { mutableStateOf("Independent Helpdesk for ${currentProfile.name} users. DM for immediate assistance.") }
+        var logoLikeness by remember { mutableStateOf(85f) }
+        var errorMessage by remember { mutableStateOf<String?>(null) }
+        var errorDetails by remember { mutableStateOf<String?>(null) }
+
+        AlertDialog(
+            onDismissRequest = { showScanDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.AddModerator,
+                        contentDescription = null,
+                        tint = CyberCyan,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Probe Asset for Username & Logo Spoofing", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            },
+            text = {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item {
+                        Text(
+                            text = "Add custom data to check if an external account or mobile application is impersonating '${currentProfile.name}' using the same username, logo likeness, or deceptive developer name.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Preset Quick-Fill Chips
+                    item {
+                        Text("Quick Test Presets:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CyberCyan)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = false,
+                                    onClick = {
+                                        assetType = AssetType.SOCIAL_PROFILE
+                                        platformName = "X / Twitter"
+                                        titleOrHandle = "@${currentProfile.name.replace(" ", "")}"
+                                        displayName = "${currentProfile.name} Verified"
+                                        publisherOrBio = "Official accounts clone test with identical handle & logo"
+                                        logoLikeness = 95f
+                                        errorMessage = null
+                                    },
+                                    label = { Text("Same Username & Logo", fontSize = 11.sp) }
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = false,
+                                    onClick = {
+                                        assetType = AssetType.MOBILE_APP
+                                        platformName = "Google Play Store"
+                                        titleOrHandle = "com.unauthorized.${currentProfile.name.lowercase().replace(" ", "")}.wallet"
+                                        displayName = "${currentProfile.name} Mobile Banking"
+                                        publisherOrBio = "Rogue Apps Studio Ltd"
+                                        logoLikeness = 90f
+                                        errorMessage = null
+                                    },
+                                    label = { Text("Fake App (Cloned Logo)", fontSize = 11.sp) }
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = false,
+                                    onClick = {
+                                        val firstOfficial = currentProfile.officialSocialAccounts.firstOrNull()
+                                        assetType = AssetType.SOCIAL_PROFILE
+                                        platformName = firstOfficial?.platform?.displayName ?: "X / Twitter"
+                                        titleOrHandle = firstOfficial?.handle ?: "@${currentProfile.name.replace(" ", "")}"
+                                        displayName = currentProfile.name
+                                        publisherOrBio = "Verified company account"
+                                        logoLikeness = 100f
+                                        errorMessage = null
+                                    },
+                                    label = { Text("Official Whitelisted Handle", fontSize = 11.sp) }
+                                )
+                            }
+                        }
+                    }
+
+                    // Asset Type Selection
+                    item {
+                        Text("Asset Classification:", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilledTonalButton(
+                                onClick = {
+                                    assetType = AssetType.SOCIAL_PROFILE
+                                    platformName = "X / Twitter"
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = if (assetType == AssetType.SOCIAL_PROFILE) CyberCyan.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = if (assetType == AssetType.SOCIAL_PROFILE) CyberCyan else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Social Profile", fontSize = 11.sp)
+                            }
+
+                            FilledTonalButton(
+                                onClick = {
+                                    assetType = AssetType.MOBILE_APP
+                                    platformName = "Google Play Store"
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = if (assetType == AssetType.MOBILE_APP) CyberCyan.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = if (assetType == AssetType.MOBILE_APP) CyberCyan else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.Default.Android, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Mobile App", fontSize = 11.sp)
+                            }
+                        }
+                    }
+
+                    // Platform Name
+                    item {
+                        OutlinedTextField(
+                            value = platformName,
+                            onValueChange = { platformName = it },
+                            label = { Text("Platform (e.g. Twitter, Instagram, Google Play)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+
+                    // Handle / Package Name
+                    item {
+                        OutlinedTextField(
+                            value = titleOrHandle,
+                            onValueChange = {
+                                titleOrHandle = it
+                                errorMessage = null
+                            },
+                            label = { Text(if (assetType == AssetType.SOCIAL_PROFILE) "Username / Handle (e.g. @MyBrand)" else "Package ID (e.g. com.brand.app)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CyberCyan)
+                        )
+                    }
+
+                    // Display Name / App Title
+                    item {
+                        OutlinedTextField(
+                            value = displayName,
+                            onValueChange = {
+                                displayName = it
+                                errorMessage = null
+                            },
+                            label = { Text(if (assetType == AssetType.SOCIAL_PROFILE) "Display Name" else "App Title") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+
+                    // Publisher / Bio
+                    item {
+                        OutlinedTextField(
+                            value = publisherOrBio,
+                            onValueChange = {
+                                publisherOrBio = it
+                                errorMessage = null
+                            },
+                            label = { Text(if (assetType == AssetType.SOCIAL_PROFILE) "Profile Bio" else "Publisher / Developer Name") },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 2
+                        )
+                    }
+
+                    // Logo Likeness Slider
+                    item {
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Visual Logo Likeness:", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                Text(
+                                    text = "${logoLikeness.toInt()}% Match",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (logoLikeness >= 75f) CyberRed else CyberCyan
+                                )
+                            }
+                            Slider(
+                                value = logoLikeness,
+                                onValueChange = { logoLikeness = it },
+                                valueRange = 0f..100f,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = if (logoLikeness >= 75f) "⚠️ Threshold met: Flags logo visual spoofing threat (+15 risk pts)" else "Below 75%: Not flagged as direct logo clone",
+                                fontSize = 10.sp,
+                                color = if (logoLikeness >= 75f) CyberAmber else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Error Banner if blocked
+                    if (errorMessage != null) {
+                        item {
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = CyberRed.copy(alpha = 0.2f)),
+                                border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(CyberRed))
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(
+                                        text = errorMessage!!,
+                                        color = CyberRed,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                    if (errorDetails != null) {
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = errorDetails!!,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val result = viewModel.submitCustomAssetScan(
+                            type = assetType,
+                            platformName = platformName.trim(),
+                            handle = titleOrHandle.trim(),
+                            name = displayName.trim(),
+                            bio = publisherOrBio.trim(),
+                            logoLikenessScore = logoLikeness.toInt()
+                        )
+
+                        if (result is SecurityValidationResult.Invalid) {
+                            errorMessage = result.errorMessage
+                            errorDetails = "${result.violationType} — ${result.technicalDetails}"
+                        } else {
+                            showScanDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = CyberCyan, contentColor = CyberNavy)
+                ) {
+                    Text("Run Risk Scan", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showScanDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

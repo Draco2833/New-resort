@@ -29,6 +29,7 @@ fun BrandProfileScreen(
     val currentProfile by viewModel.currentProfile.collectAsState()
     var showAddSocialDialog by remember { mutableStateOf(false) }
     var showAddAppDialog by remember { mutableStateOf(false) }
+    var showEditBrandDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -161,12 +162,27 @@ fun BrandProfileScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = "Corporate Brand Identity",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Corporate Brand Identity",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        FilledTonalButton(
+                            onClick = { showEditBrandDialog = true },
+                            modifier = Modifier.testTag("edit_brand_identity_button"),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Edit Brand & Logo", fontSize = 12.sp)
+                        }
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
@@ -494,6 +510,74 @@ fun BrandProfileScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddAppDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Edit Brand Identity & Logo Spec Dialog
+    if (showEditBrandDialog) {
+        var brandName by remember { mutableStateOf(currentProfile.name) }
+        var aliasesText by remember { mutableStateOf(currentProfile.aliases.joinToString(", ")) }
+        var logoDescription by remember { mutableStateOf(currentProfile.logoDescription) }
+
+        AlertDialog(
+            onDismissRequest = { showEditBrandDialog = false },
+            title = { Text("Configure Brand Profile & Logo") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Define your legitimate organization's brand identity. All detection algorithms reference these values to identify look-alikes and logo clones.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = brandName,
+                        onValueChange = { brandName = it },
+                        label = { Text("Company / Brand Name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = aliasesText,
+                        onValueChange = { aliasesText = it },
+                        label = { Text("Protected Aliases (comma-separated)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("e.g. ApexBank, ApexFin, ApexPay") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = logoDescription,
+                        onValueChange = { logoDescription = it },
+                        label = { Text("Official Logo Specification") },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("e.g. Blue gradient shield with cyan radar reticle") },
+                        maxLines = 3
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (brandName.isNotBlank()) {
+                            val parsedAliases = aliasesText.split(",")
+                                .map { it.trim() }
+                                .filter { it.isNotEmpty() }
+                            viewModel.updateCustomBrand(
+                                name = brandName.trim(),
+                                aliases = parsedAliases,
+                                logoDesc = logoDescription.trim()
+                            )
+                            showEditBrandDialog = false
+                        }
+                    }
+                ) {
+                    Text("Save & Update Engine")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditBrandDialog = false }) {
                     Text("Cancel")
                 }
             }

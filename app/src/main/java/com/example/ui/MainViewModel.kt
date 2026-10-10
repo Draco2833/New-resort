@@ -252,6 +252,33 @@ class MainViewModel(
         return result
     }
 
+    fun submitCustomAssetScan(
+        type: AssetType,
+        platformName: String,
+        handle: String,
+        name: String,
+        bio: String,
+        logoLikenessScore: Int = 70
+    ): SecurityValidationResult {
+        val result = repository.ingestCandidateAsset(
+            type = type,
+            platformName = platformName,
+            titleOrHandle = handle,
+            displayName = name,
+            publisherOrBio = bio,
+            logoLikenessScore = logoLikenessScore
+        )
+        if (result is SecurityValidationResult.Valid) {
+            _selectedThreat.value = repository.monitoredAssets.value.firstOrNull()
+        }
+        return result
+    }
+
+    fun updateCustomBrand(name: String, aliases: List<String>, logoDesc: String) {
+        repository.updateCustomBrandProfile(name, aliases, logoDesc)
+        testLookalikeCandidate(_lookalikeCandidateInput.value)
+    }
+
     fun resetToDemoDefaults() {
         repository.resetToDefault()
         _searchQuery.value = ""

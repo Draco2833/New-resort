@@ -62,7 +62,9 @@ class BrandRepository {
         platformName: String,
         titleOrHandle: String,
         displayName: String,
-        publisherOrBio: String
+        publisherOrBio: String,
+        logoLikenessScore: Int = 70,
+        followersOrDownloads: String = "User Probed"
     ): SecurityValidationResult {
         // Validate each input field through the Security Gate
         val handleCheck = SecurityValidator.validate(titleOrHandle)
@@ -91,14 +93,23 @@ class BrandRepository {
             titleOrHandle = titleOrHandle.trim(),
             displayName = displayName.trim(),
             publisherOrBio = publisherOrBio.trim(),
-            followersOrDownloads = "Newly Detected",
-            logoLikenessScore = 70
+            followersOrDownloads = followersOrDownloads,
+            logoLikenessScore = logoLikenessScore
         )
 
         val evaluated = MonitoringEngine.evaluate(raw, _currentProfile.value)
         _monitoredAssets.value = listOf(evaluated) + _monitoredAssets.value
 
         return SecurityValidationResult.Valid(titleOrHandle)
+    }
+
+    fun updateCustomBrandProfile(name: String, aliases: List<String>, logoDesc: String) {
+        val updated = _currentProfile.value.copy(
+            name = name.trim(),
+            aliases = aliases,
+            logoDescription = logoDesc.trim()
+        )
+        setBrandProfile(updated)
     }
 
     private fun logBlockedEvent(invalid: SecurityValidationResult.Invalid) {
